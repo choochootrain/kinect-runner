@@ -1,0 +1,7 @@
+This is the Kinect Dashboard
+
+Goals:
+  Use kinect to regognize gestures and fire commands to play music, turn off lights, ..etc
+
+    Gesture recognition
+    System hooks
