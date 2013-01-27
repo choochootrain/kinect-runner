@@ -9,6 +9,7 @@ import numpy as np
 threshold = 8
 #distance from kinect to "gesture area" while sitting on couch
 current_depth = 994
+old = None
 
 def change_threshold(value):
     global threshold
@@ -23,17 +24,23 @@ def change_depth(value):
 def show_depth():
     global threshold
     global current_depth
+    global old
 
     depth, timestamp = freenect.sync_get_depth()
     depth = 255 * np.logical_and(depth >= current_depth - threshold,
                                  depth <= current_depth + threshold)
     depth = depth.astype(np.uint8)
+
+    if old != None:
+      depth = np.absolute(np.subtract(depth, old))
+
     image = cv.CreateImageHeader((depth.shape[1], depth.shape[0]),
                                  cv.IPL_DEPTH_8U,
                                  1)
     cv.SetData(image, depth.tostring(),
                depth.dtype.itemsize * depth.shape[1])
     cv.ShowImage('Depth', image)
+    old = depth
 
 
 def show_video():
