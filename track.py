@@ -32,7 +32,9 @@ def show_depth():
     depth = depth.astype(np.uint8)
 
     if old != None:
+      temp = depth
       depth = np.absolute(np.subtract(depth, old))
+      old = temp
 
     image = cv.CreateImageHeader((depth.shape[1], depth.shape[0]),
                                  cv.IPL_DEPTH_8U,
@@ -40,15 +42,9 @@ def show_depth():
     cv.SetData(image, depth.tostring(),
                depth.dtype.itemsize * depth.shape[1])
     cv.ShowImage('Depth', image)
-    old = depth
-
-
-def show_video():
-    cv.ShowImage('Video', frame_convert.video_cv(freenect.sync_get_video()[0]))
 
 
 cv.NamedWindow('Depth')
-cv.NamedWindow('Video')
 cv.CreateTrackbar('threshold', 'Depth', threshold,     500,  change_threshold)
 cv.CreateTrackbar('depth',     'Depth', current_depth, 2048, change_depth)
 
@@ -57,6 +53,5 @@ print('Press ESC in window to stop')
 
 while 1:
     show_depth()
-    show_video()
     if cv.WaitKey(10) == 27:
         break
