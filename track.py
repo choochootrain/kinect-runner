@@ -9,7 +9,7 @@ import numpy as np
 threshold = 8
 #distance from kinect to "gesture area" while sitting on couch
 current_depth = 994
-old = None
+old = np.empty_like(freenect.sync_get_depth()[0].astype(np.uint8))
 
 def change_threshold(value):
     global threshold
