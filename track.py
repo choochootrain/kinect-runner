@@ -10,6 +10,9 @@ threshold = 13
 #distance from kinect to "gesture area" while sitting on couch
 current_depth = 865
 #old = np.empty_like(freenect.sync_get_depth()[0].astype(np.uint8))
+lx = 0
+ly = 0
+jitter = 15
 
 def change_threshold(value):
     global threshold
@@ -25,6 +28,9 @@ def show_depth():
     global threshold
     global current_depth
     global old
+    global lx
+    global ly
+    global jitter
 
     depth, timestamp = freenect.sync_get_depth()
     depth = 255 * np.logical_and(depth >= current_depth - threshold,
@@ -58,11 +64,16 @@ def show_depth():
     if i != 0:
       x = int(x/i)
       y = int(y/i)
+      if abs(x-lx) < jitter:
+        x = lx
+      if abs(y-ly) < jitter:
+        y = ly
       cv.Circle(image, (x,250), 3, (128, 256, 128), -1, 8, 0)
+      print x
 
     cv.ShowImage('Depth', image)
-
-
+    lx = x
+    ly = y
 
 cv.NamedWindow('Depth')
 cv.CreateTrackbar('threshold', 'Depth', threshold,     500,  change_threshold)
