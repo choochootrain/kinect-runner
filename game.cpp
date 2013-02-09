@@ -112,16 +112,22 @@ void add_cube(vector< vector<float> > cubes_added) {
 
 void update_speed() {
   if (key_states['a'])
-    cur_vel[0] = std::min(cur_vel[0] + 0.2, 1.0);
+    cur_vel[0] = std::min(cur_vel[0] + 0.1, 0.5);
 
   if (key_states['d'])
-    cur_vel[0] = std::max(cur_vel[0] - 0.2, -1.0);
+    cur_vel[0] = std::max(cur_vel[0] - 0.1, -0.5);
 
   if (key_states['s'])
-    cur_vel[1] = std::min(cur_vel[1] + 0.2, 1.0);
+    cur_vel[1] = std::min(cur_vel[1] + 0.1, 0.5);
 
   if (key_states['w'])
-    cur_vel[1] = std::max(cur_vel[1] - 0.2, -1.0);
+    cur_vel[1] = std::max(cur_vel[1] - 0.1, -0.5);
+
+  //reset to 0 speed if no keys pressed
+  if (!(key_states['w'] && key_states['a'] && key_states['s'] && key_states['d'])) {
+    cur_vel[0] = 0;
+    cur_vel[1] = 0;
+  }
 }
 
 void update_game() {
