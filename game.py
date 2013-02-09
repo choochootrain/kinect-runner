@@ -2,12 +2,14 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from random import random
+from controller import kinect
 
 cubes = []
 cur_vel = [0.0, 0.0, 0.3]
 new_cube_delay = 10
 cube_delay_count = 10
-refreshMillis = 10
+refreshMillis = 1
+tracker = kinect.KinectTracker()
 
 def initGL():
     glClearColor(0.0,0.0,0.0,1.0)
@@ -91,11 +93,12 @@ def add_cube(cubes_added):
 
 def update_game():
     global cur_vel, cube_delay_count, new_cube_delay
-    if cube_delay_count == new_cube_delay:
+    if cube_delay_count % new_cube_delay == 0:
         cubes_added = []
         for i in range(5):
             add_cube(cubes_added)
-        cube_delay_count = 0
+    if cube_delay_count % (new_cube_delay*4)== 0:
+      tracker.update()
     cube_delay_count += 1
 
 def timer(value):
