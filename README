@@ -1,7 +1,10 @@
-This is the Kinect Dashboard
+This is the Kinect Runner
 
 Goals:
-  Use kinect to regognize gestures and fire commands to play music, turn off lights, ..etc
+  Use kinect to control cube runner game
 
-    Gesture recognition
-    System hooks
+Components:
+  controller
+    kinect
+      KinectTracker
+        Class that manages kinect connection and handles hand tracking
