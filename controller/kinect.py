@@ -17,8 +17,6 @@ class KinectTracker:
     self.ly = 0
     #thresholded to stop jittering the ghetto way
     self.jitter = 15
-    self.eig = cv.CreateImage((640, 480), 8, 1)
-    self.temp = cv.CreateImage((640, 480), 8, 1)
 
   def change_threshold(self, value):
     self.threshold = value
@@ -30,7 +28,7 @@ class KinectTracker:
     self.jitter = value
 
   def get_position(self):
-    return ((self.lx-270)/220.0, (self.ly-270)/220.0)
+    return (self.lx, self.ly)
 
   def update(self):
     depth, timestamp = freenect.sync_get_depth()
@@ -41,7 +39,7 @@ class KinectTracker:
     image = cv.CreateImageHeader((depth.shape[1], depth.shape[0]), cv.IPL_DEPTH_8U, 1)
     cv.SetData(image, depth.tostring(), depth.dtype.itemsize * depth.shape[1])
 
-    features = cv.GoodFeaturesToTrack(image, None, None, 5, 0.01, 10, None, 3, 0, 0.04)
+    features = cv.GoodFeaturesToTrack(image, None, None, 7, 0.01, 10, None, 3, 0, 0.04)
 
     #shitty not python code
     i = 0
