@@ -8,3 +8,4 @@ while True:
   controller.update()
   print time.time() - t
   print controller.get_position()
+  time.sleep(0.05)
