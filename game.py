@@ -5,10 +5,10 @@ from random import random
 from controller import kinect
 
 cubes = []
-cur_vel = [0.0, 0.0, 0.3]
+cur_vel = [0.0, 0.0, 0.5]
 new_cube_delay = 10
 cube_delay_count = 10
-refreshMillis = 1
+refreshMillis = 10
 tracker = kinect.KinectTracker()
 
 def initGL():
@@ -96,10 +96,14 @@ def update_game():
     global cur_vel, cube_delay_count, new_cube_delay
     if cube_delay_count % new_cube_delay == 0:
         cubes_added = []
-        for i in range(5):
+        for i in range(20):
             add_cube(cubes_added)
-    if cube_delay_count % (new_cube_delay*4)== 0:
+        cube_delay_count = 0
+    if cube_delay_count % new_cube_delay== 0:
       tracker.update()
+      pt = tracker.get_position()
+      print pt
+      handle_gesture(pt)
     cube_delay_count += 1
 
 def timer(value):
@@ -114,6 +118,18 @@ def reshape(width, height):
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     gluPerspective(45.0, float(width)/float(height), 1.0, 50.0)
+
+def handle_gesture(amt):
+    global cur_vel
+    max_speed = 0.1
+    if amt[0]:
+        cur_vel[0] = max_speed
+    elif not amt[0]:
+        cur_vel[0] = -max_speed
+    if amt[1]:
+        cur_vel[1] = -max_speed
+    elif not amt[1]:
+        cur_vel[1] = max_speed
 
 def handle_keypress(key, x, y):
     global cur_vel
