@@ -15,6 +15,7 @@ def initGL():
     glClearColor(0.0,0.0,0.0,1.0)
     glClearDepth(1.0)
     glEnable(GL_DEPTH_TEST)
+    glDepthFunc(GL_LEQUAL)
 
 def draw_cube(x, y, z):
     glLoadIdentity()
