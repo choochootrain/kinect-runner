@@ -1,19 +1,18 @@
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
-from random import randint
+from random import random
 
 cubes = []
 cur_vel = [0.0, 0.0, 0.3]
-new_cube_delay = 100
-cube_delay_count = 100
+new_cube_delay = 10
+cube_delay_count = 10
 refreshMillis = 10
 
 def initGL():
     glClearColor(0.0,0.0,0.0,1.0)
     glClearDepth(1.0)
     glEnable(GL_DEPTH_TEST)
-    glDepthFunc(GL_LEQUAL)
 
 def draw_cube(x, y, z):
     glLoadIdentity()
@@ -64,7 +63,7 @@ def display():
     glMatrixMode(GL_MODELVIEW)
 
     cubes_to_delete = []
-    for i,cube in enumerate(cubes[::-1]):
+    for i,cube in enumerate(cubes):
         cubes[i] = [cube[0] - cur_vel[0], cube[1] - cur_vel[1], cube[2] + cur_vel[2]]
         if cubes[i][2] > 1:
             cubes_to_delete.append(i)
@@ -78,14 +77,24 @@ def display():
 
     glutSwapBuffers()
 
+def add_cube(cubes_added):
+    global cubes
+    x = random() * 60 - 30
+    y = random() * 60 - 30
+    z = -50
+    for cube in cubes_added:
+        if abs(cube[0] - x) <= 2 and abs(cube[1] - y) <= 2:
+            add_cube(cubes_added)
+            return
+    cubes_added.append([x, y, z])
+    cubes.append([x, y, z])
+
 def update_game():
-    global cubes, cur_vel, cube_delay_count, new_cube_delay
+    global cur_vel, cube_delay_count, new_cube_delay
     if cube_delay_count == new_cube_delay:
-        for i in range(10):
-            x = randint(-10, 10)
-            y = randint(-10, 10)
-            z = -100
-            cubes.append([x, y, z])
+        cubes_added = []
+        for i in range(5):
+            add_cube(cubes_added)
         cube_delay_count = 0
     cube_delay_count += 1
 
@@ -100,15 +109,28 @@ def reshape(width, height):
     glViewport(0, 0, width, height)
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    gluPerspective(45.0, float(width)/float(height), 2.0, 100.0)
+    gluPerspective(45.0, float(width)/float(height), 1.0, 50.0)
+
+def handle_keypress(key, x, y):
+    global cur_vel
+    max_speed = 0.1
+    if key == 'd':
+        cur_vel[0] = max_speed
+    elif key == 'a':
+        cur_vel[0] = -max_speed
+    if key == 'w':
+        cur_vel[1] = max_speed
+    elif key == 's':
+        cur_vel[1] = -max_speed
 
 if __name__ == '__main__':
     glutInit()
-    glutInitDisplayMode(GLUT_DOUBLE)
+    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE)
     glutInitWindowSize(640,480)
     glutCreateWindow("Shape")
     glutDisplayFunc(display)
     glutReshapeFunc(reshape)
+    glutKeyboardFunc(handle_keypress)
     initGL()
     glutTimerFunc(0, timer, 0)
     glutMainLoop()
