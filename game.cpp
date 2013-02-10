@@ -154,18 +154,18 @@ void add_cube(vector< vector<float> > cubes_added) {
 
 void update_speed() {
   if (key_states['a'])
-    cur_vel[0] = std::min(cur_vel[0] + 0.15, 0.5);
+    cur_vel[0] = min(cur_vel[0] + 0.15, 0.5);
   else if (key_states['d'])
-    cur_vel[0] = std::max(cur_vel[0] - 0.15, -0.5);
+    cur_vel[0] = max(cur_vel[0] - 0.15, -0.5);
   else
-    cur_vel[0] = 0;
+    cur_vel[0] = 0.7*cur_vel[0];
 
   if (key_states['s'])
-    cur_vel[1] = std::min(cur_vel[1] + 0.15, 0.5);
+    cur_vel[1] = min(cur_vel[1] + 0.15, 0.5);
   else if (key_states['w'])
-    cur_vel[1] = std::max(cur_vel[1] - 0.15, -0.5);
+    cur_vel[1] = max(cur_vel[1] - 0.15, -0.5);
   else
-    cur_vel[1] = 0;
+    cur_vel[1] = 0.7*cur_vel[1];
 }
 
 void update_game() {
