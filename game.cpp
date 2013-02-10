@@ -2,16 +2,21 @@
 #include <vector>
 #include <GL/glut.h>
 #include <stdio.h>
+#include <math.h>
 
 using namespace std;
 
 float refreshMillis = 10;
 int cube_delay_count = 0;
-int new_cube_delay = 10;
+int new_cube_delay = 7;
 vector< vector<float> > cubes;
 float init_vel[] = {0.0, 0.0, 1.0};
 vector<float> cur_vel (init_vel, init_vel + sizeof(init_vel) / sizeof(float));
 bool* key_states = new bool[256];
+float ship_x = 0;
+float ship_y = -2;
+float ship_z = -10;
+int score = 0;
 
 /* Initialize OpenGL Graphics */
 void initGL() {
@@ -21,7 +26,41 @@ void initGL() {
   glDepthFunc(GL_LEQUAL);    // Set the type of depth-test
 }
 
+void draw_ship(float x, float y, float z) {
+  glLoadIdentity();
+  glTranslatef(x, y, z);
+  float roll = -40.0*sin(4*cur_vel[0]);
+  float pitch = -40.0*sin(4*cur_vel[1]);
+  glRotatef(roll, 0,0,-1);
+  glRotatef(pitch, 1,0,0);
+  glBegin(GL_TRIANGLES);
+
+  // right face
+  glColor3f(1,1,1);
+  glVertex3f( 0.0f, 0.0f, -1.0f);
+  glVertex3f( 1.0f, 0.0f,  1.0f);
+  glVertex3f( 0.0f, 0.3f,  0.0f);
+
+  // left face
+  glVertex3f( 0.0f, 0.0f, -1.0f);
+  glVertex3f(-1.0f, 0.0f,  1.0f);
+  glVertex3f( 0.0f, 0.3f,  0.0f);
+
+  // back face
+  glColor3f(0.7, 0.7, 0.7);
+  glVertex3f( 1.0f, 0.0f,  1.0f);
+  glVertex3f(-1.0f, 0.0f,  1.0f);
+  glVertex3f( 0.0f, 0.3f,  0.0f);
+
+  glEnd();
+}
+
 void draw_cube(float x, float y, float z, float r, float g, float b) {
+
+  //ghetto collision detection
+  if ((abs(z - ship_z) < 0.5) && (abs(y - ship_y) < 0.5) && (abs(x - ship_x) < 0.5))
+    score = 0;
+
   glLoadIdentity();
   glTranslatef(x, y, z);
   glBegin(GL_QUADS);
@@ -86,7 +125,7 @@ void display() {
   }
 
   //your location
-  draw_cube(0,-2,-30,1,1,1);
+  draw_ship(ship_x, ship_y, ship_z);
   for (int i = 0; i < num_to_delete; i++) {
     cubes.pop_back();
   }
@@ -115,22 +154,18 @@ void add_cube(vector< vector<float> > cubes_added) {
 
 void update_speed() {
   if (key_states['a'])
-    cur_vel[0] = std::min(cur_vel[0] + 0.1, 0.5);
-
-  if (key_states['d'])
-    cur_vel[0] = std::max(cur_vel[0] - 0.1, -0.5);
+    cur_vel[0] = std::min(cur_vel[0] + 0.15, 0.5);
+  else if (key_states['d'])
+    cur_vel[0] = std::max(cur_vel[0] - 0.15, -0.5);
+  else
+    cur_vel[0] = 0;
 
   if (key_states['s'])
-    cur_vel[1] = std::min(cur_vel[1] + 0.1, 0.5);
-
-  if (key_states['w'])
-    cur_vel[1] = std::max(cur_vel[1] - 0.1, -0.5);
-
-  //reset to 0 speed if no keys pressed
-  if (!(key_states['w'] || key_states['a'] || key_states['s'] || key_states['d'])) {
-    cur_vel[0] = 0;
+    cur_vel[1] = std::min(cur_vel[1] + 0.15, 0.5);
+  else if (key_states['w'])
+    cur_vel[1] = std::max(cur_vel[1] - 0.15, -0.5);
+  else
     cur_vel[1] = 0;
-  }
 }
 
 void update_game() {
@@ -141,8 +176,11 @@ void update_game() {
     }
   }
   cube_delay_count+=1;
+  if (cube_delay_count % 10 == 0)
+    score+=1;
 
   update_speed();
+  printf("%d\n", score);
 }
 
 void key_pressed(unsigned char key, int x, int y) {
