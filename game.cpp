@@ -15,7 +15,7 @@ bool* key_states = new bool[256];
 
 /* Initialize OpenGL Graphics */
 void initGL() {
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Set background color to black and opaque
+  glClearColor(0.1f, 0.1f, 0.1f, 1.0f); // Set background color to black and opaque
   glClearDepth(1.0f);                   // Set background depth to farthest
   glEnable(GL_DEPTH_TEST);   // Enable depth testing for z-culling
   glDepthFunc(GL_LEQUAL);    // Set the type of depth-test
@@ -84,6 +84,9 @@ void display() {
       cubes[i] = new_cube;
     }
   }
+
+  //your location
+  draw_cube(0,-2,-30,1,1,1);
   for (int i = 0; i < num_to_delete; i++) {
     cubes.pop_back();
   }
@@ -124,7 +127,7 @@ void update_speed() {
     cur_vel[1] = std::max(cur_vel[1] - 0.1, -0.5);
 
   //reset to 0 speed if no keys pressed
-  if (!(key_states['w'] && key_states['a'] && key_states['s'] && key_states['d'])) {
+  if (!(key_states['w'] || key_states['a'] || key_states['s'] || key_states['d'])) {
     cur_vel[0] = 0;
     cur_vel[1] = 0;
   }
