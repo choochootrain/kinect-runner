@@ -17,10 +17,11 @@ float ship_x = 0;
 float ship_y = -2;
 float ship_z = -10;
 int score = 0;
+float flash = 0;
 
 /* Initialize OpenGL Graphics */
 void initGL() {
-  glClearColor(0.1f, 0.1f, 0.1f, 1.0f); // Set background color to black and opaque
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Set background color to black and opaque
   glClearDepth(1.0f);                   // Set background depth to farthest
   glEnable(GL_DEPTH_TEST);   // Enable depth testing for z-culling
   glDepthFunc(GL_LEQUAL);    // Set the type of depth-test
@@ -29,14 +30,14 @@ void initGL() {
 void draw_ship(float x, float y, float z) {
   glLoadIdentity();
   glTranslatef(x, y, z);
-  float roll = -40.0*sin(4*cur_vel[0]);
-  float pitch = -40.0*sin(4*cur_vel[1]);
+  float roll = -80.0*sin(4*cur_vel[0]);
+  float pitch = 10-50.0*sin(4*cur_vel[1]);
   glRotatef(roll, 0,0,-1);
   glRotatef(pitch, 1,0,0);
   glBegin(GL_TRIANGLES);
 
   // right face
-  glColor3f(1,1,1);
+  glColor3f(0.7f, 0.7f, 1.0f);
   glVertex3f( 0.0f, 0.0f, -1.0f);
   glVertex3f( 1.0f, 0.0f,  1.0f);
   glVertex3f( 0.0f, 0.3f,  0.0f);
@@ -47,11 +48,10 @@ void draw_ship(float x, float y, float z) {
   glVertex3f( 0.0f, 0.3f,  0.0f);
 
   // back face
-  glColor3f(0.7, 0.7, 0.7);
+  glColor3f(0.3f, 0.3f, 1.0f);
   glVertex3f( 1.0f, 0.0f,  1.0f);
   glVertex3f(-1.0f, 0.0f,  1.0f);
   glVertex3f( 0.0f, 0.3f,  0.0f);
-
   glEnd();
 }
 
@@ -60,6 +60,10 @@ void draw_cube(float x, float y, float z, float r, float g, float b) {
   //ghetto collision detection
   if ((abs(z - ship_z) < 0.5) && (abs(y - ship_y) < 0.5) && (abs(x - ship_x) < 0.5))
     score = 0;
+
+  r = r*(1-fabs(z/100.0f));
+  g = g*(1-fabs(z/100.0f));
+  b = b*(1-fabs(z/100.0f));
 
   glLoadIdentity();
   glTranslatef(x, y, z);
@@ -135,7 +139,7 @@ void display() {
 void add_cube(vector< vector<float> > cubes_added) {
   float x = ((float)rand()/(float)RAND_MAX) * 60.0 - 30.0;
   float y = ((float)rand()/(float)RAND_MAX) * 60.0 - 30.0;
-  float z = -100.0;
+  float z = -150.0;
   float r = ((float)rand()/(float)RAND_MAX);
   float g = ((float)rand()/(float)RAND_MAX);
   float b = ((float)rand()/(float)RAND_MAX);
@@ -166,6 +170,11 @@ void update_speed() {
     cur_vel[1] = max(cur_vel[1] - 0.15, -0.5);
   else
     cur_vel[1] = 0.7*cur_vel[1];
+
+  if (!(key_states['w'] || key_states['a'] || key_states['s'] || key_states['d']))
+    flash = 0.8*flash;
+  else
+    flash = 1;
 }
 
 void update_game() {
@@ -184,7 +193,10 @@ void update_game() {
 }
 
 void key_pressed(unsigned char key, int x, int y) {
-  key_states[key] = true;
+  if (key == 'q')
+    exit(0);
+  else
+    key_states[key] = true;
 }
 
 void key_up(unsigned char key, int x, int y) {
