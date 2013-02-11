@@ -30,8 +30,8 @@ void initGL() {
 void draw_ship(float x, float y, float z) {
   glLoadIdentity();
   glTranslatef(x, y, z);
-  float roll = -80.0*sin(4*cur_vel[0]);
-  float pitch = 10-50.0*sin(4*cur_vel[1]);
+  float roll = -40.0*sin(4*cur_vel[0]);
+  float pitch = -50.0*sin(4*cur_vel[1]);
   glRotatef(roll, 0,0,-1);
   glRotatef(pitch, 1,0,0);
   glBegin(GL_TRIANGLES);
