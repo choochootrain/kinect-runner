@@ -15,9 +15,13 @@ vector<float> cur_vel (init_vel, init_vel + sizeof(init_vel) / sizeof(float));
 bool* key_states = new bool[256];
 float ship_x = 0;
 float ship_y = -2;
-float ship_z = -10;
+float ship_z = -8;
 int score = 0;
 float flash = 0;
+float shoot_speed = 1.9;
+float shoot_x = ship_x;
+float shoot_y = ship_y;
+float shoot_z = 0;
 
 /* Initialize OpenGL Graphics */
 void initGL() {
@@ -55,15 +59,43 @@ void draw_ship(float x, float y, float z) {
   glEnd();
 }
 
-void draw_cube(float x, float y, float z, float r, float g, float b) {
+void draw_shoot(float x, float y, float z) {
+  glLoadIdentity();
+  glTranslatef(x, y, z);
+  float roll = -40.0*sin(4*cur_vel[0]);
+  float pitch = -50.0*sin(4*cur_vel[1]);
+  glRotatef(roll, 0,0,-1);
+  glRotatef(pitch, 1,0,0);
+  glBegin(GL_TRIANGLES);
+
+  // right face
+  glColor3f(1, 0, 0);
+  glVertex3f( 0.0f, 0.0f, -1.0f);
+  glVertex3f(-0.1f, 0.0f, 0.0f);
+  glVertex3f( 0.1f, 0.0f, 0.0f);
+
+  glVertex3f( 0.0f, 0.0f, 1.0f);
+  glVertex3f(-0.1f, 0.0f, 0.0f);
+  glVertex3f( 0.1f, 0.0f, 0.0f);
+  glEnd();
+}
+
+
+
+bool draw_cube(float x, float y, float z, float r, float g, float b) {
+  //ghetto collision detection
+  if ((abs(z - shoot_z) < 0.5) && (abs(y - shoot_y) < 0.5) && (abs(x - shoot_x) < 0.5)) {
+    score += 100;
+    return true;
+  }
 
   //ghetto collision detection
   if ((abs(z - ship_z) < 0.5) && (abs(y - ship_y) < 0.5) && (abs(x - ship_x) < 0.5))
     score = 0;
 
-  r = r*(1-fabs(z/100.0f));
-  g = g*(1-fabs(z/100.0f));
-  b = b*(1-fabs(z/100.0f));
+  r = r*(1-fabs(z/200.0f));
+  g = g*(1-fabs(z/200.0f));
+  b = b*(1-fabs(z/200.0f));
 
   glLoadIdentity();
   glTranslatef(x, y, z);
@@ -110,6 +142,8 @@ void draw_cube(float x, float y, float z, float r, float g, float b) {
   glVertex3f( 1.0f, -1.0f, 1.0f);
 
   glEnd();
+
+  return false;
 }
 
 void display() {
@@ -123,13 +157,20 @@ void display() {
     if (new_cube[2] > 1) {
       num_to_delete++;
     } else {
-      draw_cube(new_cube[0], new_cube[1], new_cube[2], new_cube[3], new_cube[4], new_cube[5]);
       cubes[i] = new_cube;
+      if (draw_cube(new_cube[0], new_cube[1], new_cube[2], new_cube[3], new_cube[4], new_cube[5]))
+        cubes[i][2] = 10;
     }
+  }
+
+  if (shoot_z <= ship_z && shoot_z < 150) {
+    draw_shoot(shoot_x, shoot_y, shoot_z);
+    shoot_z = shoot_z - shoot_speed;
   }
 
   //your location
   draw_ship(ship_x, ship_y, ship_z);
+
   for (int i = 0; i < num_to_delete; i++) {
     cubes.pop_back();
   }
@@ -137,9 +178,9 @@ void display() {
 }
 
 void add_cube(vector< vector<float> > cubes_added) {
-  float x = ((float)rand()/(float)RAND_MAX) * 60.0 - 30.0;
-  float y = ((float)rand()/(float)RAND_MAX) * 60.0 - 30.0;
-  float z = -150.0;
+  float x = ((float)rand()/(float)RAND_MAX) * 100.0 - 50.0;
+  float y = ((float)rand()/(float)RAND_MAX) * 100.0 - 50.0;
+  float z = -200.0;
   float r = ((float)rand()/(float)RAND_MAX);
   float g = ((float)rand()/(float)RAND_MAX);
   float b = ((float)rand()/(float)RAND_MAX);
@@ -156,25 +197,28 @@ void add_cube(vector< vector<float> > cubes_added) {
   cubes.insert(cubes.begin(), cube);
 }
 
-void update_speed() {
+void update_state() {
   if (key_states['a'])
     cur_vel[0] = min(cur_vel[0] + 0.15, 0.5);
   else if (key_states['d'])
     cur_vel[0] = max(cur_vel[0] - 0.15, -0.5);
   else
-    cur_vel[0] = 0.7*cur_vel[0];
+    cur_vel[0] = 0.8*cur_vel[0];
 
   if (key_states['s'])
     cur_vel[1] = min(cur_vel[1] + 0.15, 0.5);
   else if (key_states['w'])
     cur_vel[1] = max(cur_vel[1] - 0.15, -0.5);
   else
-    cur_vel[1] = 0.7*cur_vel[1];
+    cur_vel[1] = 0.8*cur_vel[1];
 
   if (!(key_states['w'] || key_states['a'] || key_states['s'] || key_states['d']))
     flash = 0.8*flash;
   else
     flash = 1;
+
+  if (key_states[' '])
+    shoot_z = ship_z;
 }
 
 void update_game() {
@@ -188,7 +232,7 @@ void update_game() {
   if (cube_delay_count % 10 == 0)
     score+=1;
 
-  update_speed();
+  update_state();
   printf("%d\n", score);
 }
 
@@ -215,7 +259,7 @@ void reshape(GLsizei width, GLsizei height) {
    glViewport(0, 0, width, height);
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
-   gluPerspective(45.0f, aspect, 1.0f, 100.0f);
+   gluPerspective(120.0f, aspect, 2.0f, 200.0f);
 }
 
 int main(int argc, char** argv) {
