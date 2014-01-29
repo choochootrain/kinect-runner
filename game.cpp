@@ -6,9 +6,9 @@
 
 using namespace std;
 
-float refreshMillis = 10;
+float refreshMillis = 1;
 int cube_delay_count = 0;
-int new_cube_delay = 7;
+int new_cube_delay = 2;
 vector< vector<float> > cubes;
 float init_vel[] = {0.0, 0.0, 1.0};
 vector<float> cur_vel (init_vel, init_vel + sizeof(init_vel) / sizeof(float));
@@ -18,7 +18,7 @@ float ship_y = -2;
 float ship_z = -8;
 int score = 0;
 float flash = 0;
-float shoot_speed = 1.9;
+float shoot_speed = 3;
 float shoot_x = ship_x;
 float shoot_y = ship_y;
 float shoot_z = 0;
@@ -93,9 +93,13 @@ bool draw_cube(float x, float y, float z, float r, float g, float b) {
   if ((abs(z - ship_z) < 0.5) && (abs(y - ship_y) < 0.5) && (abs(x - ship_x) < 0.5))
     score = 0;
 
-  r = r*(1-fabs(z/200.0f));
-  g = g*(1-fabs(z/200.0f));
-  b = b*(1-fabs(z/200.0f));
+  float red = cos(z*0.01 + (x*x + y*y)*0.0001*4);
+  float ged = cos(z*0.01 + (x*x + y*y)*0.0002*4);
+  float bed = cos(z*0.01 + (x*x + y*y)*0.0003*4);
+
+  r = red*(1-fabs(z/400.0f));
+  g = ged*(1-fabs(z/400.0f));
+  b = bed*(1-fabs(z/400.0f));
 
   glLoadIdentity();
   glTranslatef(x, y, z);
@@ -178,9 +182,20 @@ void display() {
 }
 
 void add_cube(vector< vector<float> > cubes_added) {
-  float x = ((float)rand()/(float)RAND_MAX) * 100.0 - 50.0;
-  float y = ((float)rand()/(float)RAND_MAX) * 100.0 - 50.0;
-  float z = -200.0;
+  float rnd = ((float)rand()/(float)RAND_MAX);
+  float x;
+  float y;
+  if (rnd < 0.5) {
+    x = ((float)rand()/(float)RAND_MAX) * 200.0 - 100.0;
+    y = ((float)rand()/(float)RAND_MAX) * 200.0 - 100.0;
+  } else if (rnd < 0.75) {
+    x = ((float)rand()/(float)RAND_MAX) * 300.0 - 150.0;
+    y = ((float)rand()/(float)RAND_MAX) * 300.0 - 150.0;
+  } else {
+    x = ((float)rand()/(float)RAND_MAX) * 400.0 - 200.0;
+    y = ((float)rand()/(float)RAND_MAX) * 400.0 - 200.0;
+  }
+ float z = -200.0;
   float r = ((float)rand()/(float)RAND_MAX);
   float g = ((float)rand()/(float)RAND_MAX);
   float b = ((float)rand()/(float)RAND_MAX);
